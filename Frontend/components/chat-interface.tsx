@@ -37,7 +37,6 @@ export function ChatInterface({ initialQuery, onClose, onNewSearch }: ChatInterf
 
   const scrollToChatOnce = () => {
     if (!hasScrolledToChat && chatContainerRef.current) {
-      // Scroll suave hacia el chat container
       chatContainerRef.current.scrollIntoView({
         behavior: "smooth",
         block: "start",
@@ -46,7 +45,6 @@ export function ChatInterface({ initialQuery, onClose, onNewSearch }: ChatInterf
     }
   }
 
-  // Solo hacer scroll dentro del área de mensajes cuando se agregan nuevos mensajes
   useEffect(() => {
     if (messages.length > 0) {
       scrollToBottom()
@@ -54,33 +52,29 @@ export function ChatInterface({ initialQuery, onClose, onNewSearch }: ChatInterf
   }, [messages, isTyping])
 
   useEffect(() => {
-    // Agregar mensaje inicial del usuario con animación
     if (initialQuery) {
-      // Scroll hacia el chat una sola vez cuando aparece
       setTimeout(() => {
         scrollToChatOnce()
       }, 100)
 
       setTimeout(() => {
         const userMessage: Message = {
-          id: Date.now().toString(),
+          id: `${Date.now()}-${Math.random()}`,
           type: "user",
           content: initialQuery,
           timestamp: new Date(),
         }
         setMessages([userMessage])
 
-        // Simular que la IA está escribiendo
         setTimeout(() => {
           setIsTyping(true)
 
-          // Mensaje de bienvenida de la IA después de "escribir"
           setTimeout(() => {
             setIsTyping(false)
             const welcomeMessage: Message = {
-              id: (Date.now() + 1).toString(),
+              id: `${Date.now()}-${Math.random()}`,
               type: "ai",
-              content: `¡Hola! He recibido tu consulta sobre "${initialQuery}". Por el momento estoy en desarrollo, pero pronto podré ayudarte a encontrar el alojamiento perfecto. ¡Mantente atento a las actualizaciones!`,
+              content: `¡Hola! He recibido tu consulta sobre "${initialQuery}". Estoy aquí para ayudarte. ¿En qué más puedo asistirte?`,
               timestamp: new Date(),
             }
             setMessages((prev) => [...prev, welcomeMessage])
@@ -90,11 +84,11 @@ export function ChatInterface({ initialQuery, onClose, onNewSearch }: ChatInterf
     }
   }, [initialQuery])
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!currentMessage.trim()) return
 
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random()}`,
       type: "user",
       content: currentMessage,
       timestamp: new Date(),
@@ -102,24 +96,43 @@ export function ChatInterface({ initialQuery, onClose, onNewSearch }: ChatInterf
 
     setMessages((prev) => [...prev, userMessage])
     setCurrentMessage("")
+    setIsTyping(true)
 
-    // Simular que la IA está escribiendo
-    setTimeout(() => {
-      setIsTyping(true)
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: currentMessage }),
+      })
 
-      // Respuesta automática placeholder después de "escribir"
-      setTimeout(() => {
-        setIsTyping(false)
-        const aiResponse: Message = {
-          id: (Date.now() + 1).toString(),
-          type: "ai",
-          content:
-            "Gracias por tu mensaje. Estoy en desarrollo y pronto podré procesar tus consultas de manera inteligente. ¡Espera próximas actualizaciones!",
-          timestamp: new Date(),
-        }
-        setMessages((prev) => [...prev, aiResponse])
-      }, 1500)
-    }, 500)
+      if (!response.ok) {
+        throw new Error("Error en la API")
+      }
+
+      const data = await response.json()
+
+      const aiResponse: Message = {
+        id: `${Date.now()}-${Math.random()}`,
+        type: "ai",
+        content: data.text || "Lo siento, no pude generar una respuesta.",
+        timestamp: new Date(),
+      }
+
+      setMessages((prev) => [...prev, aiResponse])
+    } catch (error) {
+      console.error("Error al llamar a la API:", error)
+      const errorMessage: Message = {
+        id: `${Date.now()}-${Math.random()}`,
+        type: "ai",
+        content: "Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta nuevamente más tarde.",
+        timestamp: new Date(),
+      }
+      setMessages((prev) => [...prev, errorMessage])
+    } finally {
+      setIsTyping(false)
+    }
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -149,7 +162,7 @@ export function ChatInterface({ initialQuery, onClose, onNewSearch }: ChatInterf
                     Beta
                   </span>
                 </h3>
-                <p className="text-sm text-gray-600">Próximamente con IA avanzada</p>
+                <p className="text-sm text-gray-600">Impulsado por IA avanzada</p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
@@ -281,7 +294,7 @@ export function ChatInterface({ initialQuery, onClose, onNewSearch }: ChatInterf
               </Button>
             </div>
             <p className="text-xs text-gray-500 mt-2 text-center">
-              Presiona Enter para enviar • Próximamente con IA inteligente ✨
+              Presiona Enter para enviar • Impulsado por Gemini AI ✨
             </p>
           </div>
         </CardContent>
