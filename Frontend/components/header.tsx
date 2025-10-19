@@ -13,11 +13,25 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Menu, User, Globe, Heart, Calendar, Settings, HelpCircle, LogOut, UserPlus, LogIn, Home } from "lucide-react"
 import { AuthModal } from "@/components/auth-modal"
 
+/**
+ * Header principal de la aplicación.
+ * Contiene el logo, navegación y el menú de usuario.
+ * - Muestra enlaces de navegación
+ * - Contiene un Dropdown para acciones de usuario
+ * - Abre el modal de autenticación cuando corresponde
+ */
 export function Header() {
+  // Control del modal de autenticación y modo (login/register).
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [authMode, setAuthMode] = useState<"login" | "register">("login")
-  const isLoggedIn = false // Esto vendría de tu estado de autenticación
 
+  // Estado simulado de autenticación. En la app real esto vendría del contexto o store.
+  const isLoggedIn = false // TODO: reemplazar por contexto/auth real
+
+  /**
+   * Abre el modal de autenticación en el modo especificado.
+   * @param mode "login" | "register"
+   */
   const openAuthModal = (mode: "login" | "register") => {
     setAuthMode(mode)
     setIsAuthModalOpen(true)

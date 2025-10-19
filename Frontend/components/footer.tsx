@@ -2,6 +2,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Facebook, Twitter, Instagram, Youtube } from "lucide-react"
 
+/**
+ * Footer de la aplicación con información de la compañía, enlaces rápidos,
+ * soporte y suscripción al newsletter.
+ *
+ * Observaciones:
+ * - Los enlaces usan `href="#"` como placeholder; reemplazar por rutas reales.
+ * - El input del newsletter no está conectado a ningún backend; requiere handler
+ *   para enviar el email.
+ */
 export function Footer() {
   return (
     <footer className="bg-gray-900 text-white">
@@ -14,6 +23,7 @@ export function Footer() {
               Tu plataforma de confianza para encontrar el alojamiento perfecto en cualquier lugar del mundo.
             </p>
             <div className="flex space-x-4">
+              {/* Social buttons: agregar enlaces reales si se desean */}
               <Button variant="ghost" size="icon" className="text-gray-300 hover:text-white">
                 <Facebook className="h-5 w-5" />
               </Button>

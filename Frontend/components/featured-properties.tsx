@@ -8,8 +8,26 @@ import { getPruebas } from "@/controllers/prueba"
 import { useEffect, useState } from "react"
 
 
+/**
+ * Interfaz local para representar una propiedad destacada.
+ */
+interface Property {
+  id: number
+  title: string
+  location: string
+  price: number
+  rating: number
+  reviews: number
+  image?: string
+  badge?: string
+}
 
-const properties = [
+
+/**
+ * Lista estática de propiedades de ejemplo usada para render inicial.
+ * En producción, estos datos deberían venir de una API.
+ */
+const properties: Property[] = [
   {
     id: 1,
     title: "Villa moderna con vista al mar",
@@ -54,21 +72,27 @@ const properties = [
 
 
 export function FeaturedProperties() {
-  const [data, setData] = useState<any[]>([]);
+  // Datos adicionales obtenidos desde el controlador `getPruebas`.
+  // Tipamos como objeto genérico con campos comunes; reemplaza con una interface
+  // más precisa según la respuesta real de la API.
+  const [data, setData] = useState<Array<{ name?: string; description?: string }>>([])
 
   useEffect(() => {
+    // Fetch de ejemplo: llamar al controlador que hace request al backend.
     const fetchData = async () => {
       try {
-        const result = await getPruebas();
-        setData(result);
-        console.log('Data obtenida:', result); 
+        const result = await getPruebas()
+        setData(result)
+        console.log("Data obtenida:", result)
       } catch (error) {
-        console.error('Error fetching data:', error);
+        // Manejo básico de errores: log para desarrollo.
+        // En producción, mostrar UI de error al usuario.
+        console.error("Error fetching data:", error)
       }
-    };
-    
-    fetchData();
-  }, []);
+    }
+
+    fetchData()
+  }, [])
   return (
     <section className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
