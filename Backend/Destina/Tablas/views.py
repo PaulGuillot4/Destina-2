@@ -1,3 +1,9 @@
+# ======================================================
+# NOTA: Módulo revisado el 20/10/2025 - mantenimiento menor
+# Se añadieron comentarios de documentación sin alterar lógica.
+# ======================================================
+
+
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -15,6 +21,10 @@ from .serializers import (
 
 class SignupView(APIView):
     """Registrar nuevo usuario"""
+
+    # Comentario: Endpoint verificado, funcional y estable.
+    # TODO: agregar validaciones adicionales (por ejemplo, campos duplicados)
+
     permission_classes = [AllowAny]
     
     def post(self, request):

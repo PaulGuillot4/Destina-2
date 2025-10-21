@@ -1,3 +1,8 @@
+// ======================================================
+// NOTA: Componente ChatInterface revisado el 20/10/2025
+// Se añadieron comentarios de mantenimiento y legibilidad
+// ======================================================
+
 "use client"
 
 import type React from "react"
@@ -24,10 +29,15 @@ interface ChatInterfaceProps {
 }
 
 export function ChatInterface({ initialQuery, onClose, onNewSearch }: ChatInterfaceProps) {
+  // Estado: almacena el historial de mensajes del chat
   const [messages, setMessages] = useState<Message[]>([])
   const [currentMessage, setCurrentMessage] = useState("")
+
+  // Controla si la IA está escribiendo (efecto de “typing”)
   const [isTyping, setIsTyping] = useState(false)
   const [hasScrolledToChat, setHasScrolledToChat] = useState(false)
+
+  // Comentario: referencia al contenedor para el scroll automático
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
 
@@ -302,3 +312,6 @@ export function ChatInterface({ initialQuery, onClose, onNewSearch }: ChatInterf
     </div>
   )
 }
+
+// Fin del componente ChatInterface
+// Última revisión: 20/10/2025
