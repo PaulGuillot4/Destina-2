@@ -14,6 +14,9 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { X, Send, User, RotateCcw, Sparkles } from "lucide-react"
 
+import { useAiSuggestions } from "@/context/AiSuggestionsContext"
+import { findDestinations } from "@/lib/destinationCatalog"
+
 interface Message {
   id: string
   type: "user" | "ai"
@@ -36,6 +39,8 @@ export function ChatInterface({ initialQuery, onClose, onNewSearch }: ChatInterf
   // Controla si la IA está escribiendo (efecto de “typing”)
   const [isTyping, setIsTyping] = useState(false)
   const [hasScrolledToChat, setHasScrolledToChat] = useState(false)
+  // Nuevo: Guardar sessionId
+  const [sessionId, setSessionId] = useState<string | null>(null)
 
   // Comentario: referencia al contenedor para el scroll automático
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -61,6 +66,7 @@ export function ChatInterface({ initialQuery, onClose, onNewSearch }: ChatInterf
     }
   }, [messages, isTyping])
 
+  // Actualizar el efecto inicial para usar el nuevo sistema
   useEffect(() => {
     if (initialQuery) {
       setTimeout(() => {
@@ -79,21 +85,48 @@ export function ChatInterface({ initialQuery, onClose, onNewSearch }: ChatInterf
         setTimeout(() => {
           setIsTyping(true)
 
-          setTimeout(() => {
-            setIsTyping(false)
-            const welcomeMessage: Message = {
-              id: `${Date.now()}-${Math.random()}`,
-              type: "ai",
-              content: `¡Hola! He recibido tu consulta sobre "${initialQuery}". Estoy aquí para ayudarte. ¿En qué más puedo asistirte?`,
-              timestamp: new Date(),
-            }
-            setMessages((prev) => [...prev, welcomeMessage])
-          }, 2000)
+          // Enviar mensaje inicial a la API
+          fetch("/api/chat", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ message: initialQuery }),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              setIsTyping(false)
+              
+              // Guardar sessionId
+              if (data.sessionId) {
+                setSessionId(data.sessionId)
+              }
+
+              const welcomeMessage: Message = {
+                id: `${Date.now()}-${Math.random()}`,
+                type: "ai",
+                content: data.text || `¡Hola! He recibido tu consulta sobre "${initialQuery}". Estoy aquí para ayudarte. ¿En qué más puedo asistirte?`,
+                timestamp: new Date(),
+              }
+              setMessages((prev) => [...prev, welcomeMessage])
+            })
+            .catch((error) => {
+              console.error("Error:", error)
+              setIsTyping(false)
+              const errorMessage: Message = {
+                id: `${Date.now()}-${Math.random()}`,
+                type: "ai",
+                content: "Lo siento, hubo un error al procesar tu mensaje inicial.",
+                timestamp: new Date(),
+              }
+              setMessages((prev) => [...prev, errorMessage])
+            })
         }, 800)
       }, 300)
     }
   }, [initialQuery])
 
+  // Función mejorada para enviar mensaje con contexto
   const handleSendMessage = async () => {
     if (!currentMessage.trim()) return
 
@@ -105,6 +138,7 @@ export function ChatInterface({ initialQuery, onClose, onNewSearch }: ChatInterf
     }
 
     setMessages((prev) => [...prev, userMessage])
+    const messageToSend = currentMessage
     setCurrentMessage("")
     setIsTyping(true)
 
@@ -114,7 +148,10 @@ export function ChatInterface({ initialQuery, onClose, onNewSearch }: ChatInterf
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: currentMessage }),
+        body: JSON.stringify({ 
+          message: messageToSend,
+          sessionId: sessionId, // Enviar sessionId si existe
+        }),
       })
 
       if (!response.ok) {
@@ -123,6 +160,12 @@ export function ChatInterface({ initialQuery, onClose, onNewSearch }: ChatInterf
 
       const data = await response.json()
 
+      // Guardar sessionId si es la primera vez
+      if (data.sessionId && !sessionId) {
+        setSessionId(data.sessionId)
+      }
+
+      // Usar la respuesta limpia
       const aiResponse: Message = {
         id: `${Date.now()}-${Math.random()}`,
         type: "ai",
@@ -131,6 +174,14 @@ export function ChatInterface({ initialQuery, onClose, onNewSearch }: ChatInterf
       }
 
       setMessages((prev) => [...prev, aiResponse])
+
+      // Si hay datos estructurados, puedes usarlos para acciones adicionales
+      if (data.structuredData?.destinations?.length) {
+        const matches = findDestinations(data.structuredData.destinations)
+        if (matches.length) {
+          setDestinations(matches)
+        }
+      }
     } catch (error) {
       console.error("Error al llamar a la API:", error)
       const errorMessage: Message = {
@@ -242,7 +293,7 @@ export function ChatInterface({ initialQuery, onClose, onNewSearch }: ChatInterf
                           : "bg-white/90 backdrop-blur-sm text-gray-800 border border-gray-100/50 rounded-bl-md shadow-lg"
                       }`}
                     >
-                      <p className="text-sm leading-relaxed">{message.content}</p>
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                     </div>
                     <p
                       className={`text-xs px-2 ${message.type === "user" ? "text-blue-200 text-right" : "text-gray-400"}`}

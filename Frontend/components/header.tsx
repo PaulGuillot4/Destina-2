@@ -37,6 +37,14 @@ export function Header() {
     setIsAuthModalOpen(true)
   }
 
+  const scrollToSection = (sectionId: string) => {
+    if (typeof window === "undefined") return
+    const target = document.getElementById(sectionId)
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" })
+    }
+  }
+
   return (
     <>
       <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
@@ -52,15 +60,27 @@ export function Header() {
 
             {/* Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
-              <a href="#" className="text-gray-700 hover:text-gray-900 font-medium transition-colors">
+              <button
+                type="button"
+                onClick={() => scrollToSection("section-alojamientos")}
+                className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
+              >
                 Alojamientos
-              </a>
-              <a href="#" className="text-gray-700 hover:text-gray-900 font-medium transition-colors">
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollToSection("section-experiencias")}
+                className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
+              >
                 Experiencias
-              </a>
-              <a href="#" className="text-gray-700 hover:text-gray-900 font-medium transition-colors">
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollToSection("section-ayuda")}
+                className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
+              >
                 Ayuda
-              </a>
+              </button>
             </nav>
 
             {/* User menu */}

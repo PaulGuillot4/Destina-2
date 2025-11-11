@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Search, Loader2 } from "lucide-react"
 import { ChatInterface } from "@/components/chat-interface"
 
-export function SearchSection() {
+export function SearchSection({ id }: { id?: string }) {
   const [searchQuery, setSearchQuery] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [showChat, setShowChat] = useState(false)
@@ -61,7 +61,7 @@ export function SearchSection() {
   }
 
   return (
-    <section className="relative z- bg-gradient-to-br from-rose-50 to-pink-50 py-20 transition-all duration-700 ease-out">
+    <section id={id} className="relative z- bg-gradient-to-br from-rose-50 to-pink-50 py-20 transition-all duration-700 ease-out">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div

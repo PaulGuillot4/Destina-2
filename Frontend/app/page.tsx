@@ -10,10 +10,10 @@ export default function HomePage() {
     <div className="min-h-screen bg-white">
       <Header />
       <main>
-        <SearchSection />
-        <Categories />
-        <FeaturedProperties />
-        <HowItWorks />
+        <SearchSection id="section-buscar" />
+        <Categories id="section-experiencias" />
+        <FeaturedProperties id="section-alojamientos" />
+        <HowItWorks id="section-ayuda" />
       </main>
       <Footer />
     </div>
